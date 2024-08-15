@@ -8,6 +8,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.get('https://fapi.binance.com/fapi/v1/ticker/24h', (req, res) => {
+app.get('/', (req, res) => {
     console.log()
 })
