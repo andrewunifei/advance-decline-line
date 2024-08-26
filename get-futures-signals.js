@@ -19,10 +19,10 @@ const getAssetCategory = (market_cap) => {
         return 'LARGE';
     }
     else if(market_cap <= 10000) {
-        return 'MEGA10';
+        return 'MEGA10B';
     }
     else if(market_cap <= 100000) {
-        return 'MEGA100';
+        return 'MEGA100B';
     }
     else if(market_cap <= 2000000) {
         return 'ULTRA';
@@ -42,7 +42,7 @@ const getBinanceSignals = async () => {
 
         for(let i = 0; i < data.length; i++) {
             const symbol = data[i].symbol.slice(0, -4).toUpperCase();
-            const priceChangePercent = data[i].priceChangePercent;
+            const priceChangePercent = Number(data[i].priceChangePercent);
             const volume = data[i].volume;
             const highPrice = data[i].highPrice;
             const lowPrice = data[i].lowPrice; 
@@ -90,11 +90,37 @@ const getFuturesSignals = async () => {
             data['data'][String(i)]['last24hLowPrice'] = last24BinanceFutures['lowPrice'];
         }
 
-        console.log(Object.fromEntries(Object.entries(data['data']).slice(0,10)));
+        //console.log(Object.fromEntries(Object.entries(data['data']).slice(0,10)));
+
+        return data;
     }
     catch(e) {
         console.log(e);
     }
 }
 
-await getFuturesSignals();
+const organizeData = async () => {
+    const data = await getFuturesSignals();
+    let organized = {
+        'NANO': [],
+        'MICRO': [],
+        'SMALL': [],
+        'MID': [],
+        'LARGE': [],
+        'MEGA10B': [],
+        'MEGA100B': [],
+        'ULTRA': []
+    };
+
+    for(let i = 0; i < Object.keys(data['data']).length; i++) {
+        organized[data['data'][String(i)]['marketCapCategory']].push(data['data'][String(i)]);
+        organized[data['data'][String(i)]['marketCapCategory']] = organized[data['data'][String(i)]['marketCapCategory']].sort(
+            (a, b) => b.priceChangePercent - a.priceChangePercent
+        )
+    }
+
+    return organized;
+}
+
+const organized_data = await organizeData();
+console.log(organized_data)
